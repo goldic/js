@@ -116,7 +116,9 @@ func (v Value) Array() Array {
 		return val
 
 	default:
-		return nil
+		var arr []any
+		noErr(v.MarshalTo(&arr))
+		return arr
 	}
 }
 

@@ -1,6 +1,9 @@
 package js
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 type Array []any
 
@@ -90,6 +93,10 @@ func (arr Array) Map(fn func(v Value) any) Array {
 		vv = append(vv, fn(NewValue(v)))
 	}
 	return vv
+}
+
+func (arr Array) Join(sep string) string {
+	return strings.Join(arr.Strings(), sep)
 }
 
 func (arr Array) Objects() []Object {

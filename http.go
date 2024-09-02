@@ -32,7 +32,7 @@ func PostData(url string, jsonPostData any) (Value, error) {
 }
 
 func Request(method, url string, headers Object, body any) (res Value, err error) {
-	defer recoverErr(&err)
+	defer catch(&err)
 
 	client := http.DefaultClient
 	if strings.HasPrefix(url, http2Proto) {
@@ -42,12 +42,12 @@ func Request(method, url string, headers Object, body any) (res Value, err error
 	}
 	trace := strings.HasSuffix(url, "#trace")
 	url = strings.TrimSuffix(url, "#trace")
-	if method == "" {
-		method = http.MethodGet
-	}
 	var contType = ""
 	var reqBody io.Reader
 	if !isNil(body) {
+		if method == "" {
+			method = http.MethodPost
+		}
 		switch v := body.(type) {
 		case url2.Values:
 			reqBody, contType = bytes.NewBufferString(v.Encode()), "application/x-www-form-urlencoded"
@@ -58,10 +58,13 @@ func Request(method, url string, headers Object, body any) (res Value, err error
 		case string:
 			reqBody = bytes.NewBufferString(v)
 		default:
-			reqBody, contType = bytes.NewBuffer(noerrVal(json.Marshal(body))), "application/json"
+			reqBody, contType = bytes.NewBuffer(tryVal(json.Marshal(body))), "application/json"
 		}
 	}
-	req := noerrVal(http.NewRequest(method, url, reqBody))
+	if method == "" {
+		method = http.MethodGet
+	}
+	req := tryVal(http.NewRequest(method, url, reqBody))
 	req.Header.Set("Accept", "*/*")
 	req.Header.Set("User-Agent", "Mozilla/5.0")
 	if contType != "" {
@@ -85,7 +88,7 @@ func Request(method, url string, headers Object, body any) (res Value, err error
 			log.Printf("js> http-Request-Body: %s", reqBody)
 		}
 	}
-	resp := noerrVal(client.Do(req))
+	resp := tryVal(client.Do(req))
 	defer resp.Body.Close()
 	if trace {
 		log.Printf("js> http-Response-StatusCode: %v `%v`", resp.StatusCode, resp.Status)

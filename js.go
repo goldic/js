@@ -11,25 +11,25 @@ func Marshal(v any) ([]byte, error) {
 }
 
 func Encode(v any) string {
-	return string(noerrVal(json.Marshal(v)))
+	return string(tryVal(json.Marshal(v)))
 }
 
 func IndentEncode(v any) string {
-	return string(noerrVal(json.MarshalIndent(v, "", "  ")))
+	return string(tryVal(json.MarshalIndent(v, "", "  ")))
 }
 
-func noerrVal[T any](v T, err error) T {
-	noErr(err)
-	return v
-}
-
-func noErr(err error) {
+func try(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-func recoverErr(err *error) {
+func tryVal[T any](v T, err error) T {
+	try(err)
+	return v
+}
+
+func catch(err *error) {
 	if r := recover(); r != nil && err != nil && *err == nil {
 		if e, ok := r.(error); ok {
 			*err = e
@@ -43,5 +43,5 @@ func readAll(r io.Reader) []byte {
 	if c, ok := r.(io.ReadCloser); ok && c != nil {
 		defer c.Close()
 	}
-	return noerrVal(io.ReadAll(r))
+	return tryVal(io.ReadAll(r))
 }

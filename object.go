@@ -22,7 +22,7 @@ func NewObject(v any) Object {
 	case Value:
 		return NewObject(val.val)
 	}
-	return noerrVal(ParseObject(noerrVal(json.Marshal(v))))
+	return tryVal(ParseObject(tryVal(json.Marshal(v))))
 }
 
 func (obj Object) String() string {
@@ -33,11 +33,11 @@ func (obj Object) String() string {
 }
 
 func (obj Object) Bytes() []byte {
-	return noerrVal(json.Marshal(map[string]any(obj)))
+	return tryVal(json.Marshal(map[string]any(obj)))
 }
 
 func (obj Object) IndentString() string {
-	return string(noerrVal(json.MarshalIndent(map[string]any(obj), "", "  ")))
+	return string(tryVal(json.MarshalIndent(map[string]any(obj), "", "  ")))
 }
 
 func (obj Object) Copy() Object {
@@ -190,10 +190,10 @@ func ParseObject(data []byte) (obj Object, err error) {
 }
 
 func MustParseObject(data []byte) Object {
-	return noerrVal(ParseObject(data))
+	return tryVal(ParseObject(data))
 }
 
 func ReadObject(r io.Reader) (_ Object, err error) {
-	defer recoverErr(&err)
+	defer catch(&err)
 	return ParseObject(readAll(r))
 }

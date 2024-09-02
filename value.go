@@ -29,11 +29,11 @@ func Parse(data []byte) (v Value, err error) {
 }
 
 func MustParse(data []byte) Value {
-	return noerrVal(Parse(data))
+	return tryVal(Parse(data))
 }
 
 func ReadValue(r io.Reader) (v Value, err error) {
-	defer recoverErr(&err)
+	defer catch(&err)
 	return Parse(readAll(r))
 }
 
@@ -117,7 +117,7 @@ func (v Value) Array() Array {
 
 	default:
 		var arr []any
-		noErr(v.MarshalTo(&arr))
+		try(v.MarshalTo(&arr))
 		return arr
 	}
 }

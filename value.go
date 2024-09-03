@@ -1,9 +1,11 @@
 package js
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -24,7 +26,7 @@ func Parse(data []byte) (v Value, err error) {
 	if len(data) == 0 {
 		return
 	}
-	err = json.Unmarshal(data, &v.val)
+	err = json.Unmarshal(bytes.TrimSpace(data), &v.val)
 	return
 }
 
@@ -104,22 +106,23 @@ func (v Value) IsObject() bool {
 }
 
 func (v Value) IsArray() bool {
-	return v.Array() != nil
+	kind := reflect.ValueOf(v.val).Kind()
+	return kind == reflect.Slice || kind == reflect.Array
 }
 
 func (v Value) Array() Array {
+	if !v.IsArray() {
+		return nil
+	}
 	switch val := v.val.(type) {
 	case []any:
 		return val
-
 	case Array:
 		return val
-
-	default:
-		var arr []any
-		try(v.MarshalTo(&arr))
-		return arr
 	}
+	var arr []any
+	v.MarshalTo(&arr) // ignore error
+	return arr
 }
 
 func (v Value) Object() Object {

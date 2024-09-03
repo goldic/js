@@ -36,7 +36,7 @@ func (arr Array) IsNull() bool {
 	return arr == nil
 }
 
-func (arr *Array) Append(v any) {
+func (arr *Array) Push(v any) {
 	*arr = append(*arr, v)
 }
 

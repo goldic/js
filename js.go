@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"runtime"
 )
 
 func Marshal(v any) ([]byte, error) {
@@ -20,12 +21,16 @@ func IndentEncode(v any) string {
 
 func try(err error) {
 	if err != nil {
-		panic(err)
+		_, file, line, _ := runtime.Caller(2)
+		panic(fmt.Errorf("%w\n\t%s:%d", err, file, line))
 	}
 }
 
 func tryVal[T any](v T, err error) T {
-	try(err)
+	if err != nil {
+		_, file, line, _ := runtime.Caller(2)
+		panic(fmt.Errorf("%w\n\t%s:%d", err, file, line))
+	}
 	return v
 }
 

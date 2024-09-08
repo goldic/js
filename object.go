@@ -22,7 +22,7 @@ func NewObject(v any) Object {
 	case Value:
 		return NewObject(val.val)
 	}
-	return tryVal(ParseObject(tryVal(json.Marshal(v))))
+	return MustParseObject(tryVal(json.Marshal(v)))
 }
 
 func (obj Object) String() string {
@@ -183,9 +183,6 @@ func ParseObject(data []byte) (obj Object, err error) {
 	if len(data) > 0 {
 		err = json.Unmarshal(data, &obj)
 	}
-	if obj == nil {
-		obj = Object{}
-	}
 	return
 }
 
@@ -193,7 +190,7 @@ func MustParseObject(data []byte) Object {
 	return tryVal(ParseObject(data))
 }
 
-func ReadObject(r io.Reader) (_ Object, err error) {
+func ReadObject(r io.Reader) (obj Object, err error) {
 	defer catch(&err)
 	return ParseObject(readAll(r))
 }

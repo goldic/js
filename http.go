@@ -130,3 +130,11 @@ func encHeader(h http.Header) (res string) {
 	}
 	return
 }
+
+func URLValuesToObject(val url2.Values) Object {
+	obj := make(Object, len(val))
+	for k, vv := range val {
+		obj[k] = vv[0]
+	}
+	return obj
+}

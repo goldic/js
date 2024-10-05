@@ -194,3 +194,12 @@ func ReadObject(r io.Reader) (obj Object, err error) {
 	defer catch(&err)
 	return ParseObject(readAll(r))
 }
+
+// ObjectFromURLValues converts url.Values to an object.
+func ObjectFromURLValues(val url.Values) Object {
+	obj := make(Object, len(val))
+	for k, vv := range val {
+		obj[k] = vv[0]
+	}
+	return obj
+}

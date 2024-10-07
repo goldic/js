@@ -202,6 +202,7 @@ func (obj Object) URLValues() (values url.Values) {
 	return
 }
 
+// ParseObject parses the object from bytes (JSON).
 func ParseObject(data []byte) (obj Object, err error) {
 	if len(data) > 0 {
 		err = json.Unmarshal(data, &obj)
@@ -209,10 +210,12 @@ func ParseObject(data []byte) (obj Object, err error) {
 	return
 }
 
+// MustParseObject parses the object from bytes (JSON) and panics on error.
 func MustParseObject(data []byte) Object {
 	return tryVal(ParseObject(data))
 }
 
+// ReadObject reads the object from io.Reader.
 func ReadObject(r io.Reader) (obj Object, err error) {
 	defer catch(&err)
 	return ParseObject(readAll(r))

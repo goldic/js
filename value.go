@@ -31,7 +31,7 @@ func Parse(data []byte) (v Value, err error) {
 }
 
 func MustParse(data []byte) Value {
-	return tryVal(Parse(data))
+	return must(Parse(data))
 }
 
 func ReadValue(r io.Reader) (v Value, err error) {
@@ -126,7 +126,7 @@ func (v Value) Array() Array {
 }
 
 func (v Value) Object() Object {
-	return NewObject(v.val)
+	return newObject(v.val)
 }
 
 func (v Value) Objects() []Object {

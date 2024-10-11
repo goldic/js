@@ -12,21 +12,21 @@ func Marshal(v any) ([]byte, error) {
 }
 
 func Encode(v any) string {
-	return string(tryVal(json.Marshal(v)))
+	return string(must(json.Marshal(v)))
 }
 
 func IndentEncode(v any) string {
-	return string(tryVal(json.MarshalIndent(v, "", "  ")))
+	return string(must(json.MarshalIndent(v, "", "  ")))
 }
 
-func try(err error) {
+func check(err error) {
 	if err != nil {
 		_, file, line, _ := runtime.Caller(2)
 		panic(fmt.Errorf("%w\n\t%s:%d", err, file, line))
 	}
 }
 
-func tryVal[T any](v T, err error) T {
+func must[T any](v T, err error) T {
 	if err != nil {
 		_, file, line, _ := runtime.Caller(2)
 		panic(fmt.Errorf("%w\n\t%s:%d", err, file, line))
@@ -48,5 +48,5 @@ func readAll(r io.Reader) []byte {
 	if c, ok := r.(io.ReadCloser); ok && c != nil {
 		defer c.Close()
 	}
-	return tryVal(io.ReadAll(r))
+	return must(io.ReadAll(r))
 }

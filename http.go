@@ -61,13 +61,13 @@ func Request(method, url string, headers Object, body any) (res Value, err error
 		case string:
 			reqBody = bytes.NewBufferString(v)
 		default:
-			reqBody, contType = bytes.NewBuffer(tryVal(json.Marshal(body))), "application/json"
+			reqBody, contType = bytes.NewBuffer(must(json.Marshal(body))), "application/json"
 		}
 	}
 	if method == "" {
 		method = http.MethodGet
 	}
-	req := tryVal(http.NewRequest(method, url, reqBody))
+	req := must(http.NewRequest(method, url, reqBody))
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", "Mozilla/5.0")
 	req.Header.Set("Accept-Encoding", "gzip, deflate")
@@ -89,7 +89,7 @@ func Request(method, url string, headers Object, body any) (res Value, err error
 			log.Printf("js> http-Request-Body: %s", reqBody)
 		}
 	}
-	resp := tryVal(client.Do(req))
+	resp := must(client.Do(req))
 	defer resp.Body.Close()
 	if trace {
 		log.Printf("js> http-Response: %v `%v` %s", resp.StatusCode, resp.Status, encHeader(resp.Header))
@@ -102,18 +102,18 @@ func Request(method, url string, headers Object, body any) (res Value, err error
 	case "":
 		respReader = resp.Body
 	case "gzip":
-		respReader = tryVal(gzip.NewReader(resp.Body))
+		respReader = must(gzip.NewReader(resp.Body))
 		defer respReader.Close()
 	case "deflate":
 		respReader = flate.NewReader(resp.Body)
 		defer respReader.Close()
 	//case "br":
-	//	respReader = tryVal(brotli.NewReader(resp.Body, nil))
+	//	respReader = must(brotli.NewReader(resp.Body, nil))
 	//	defer respReader.Close()
 	//case "compress": ...
 	//case "sdch": ...
 	default:
-		try(fmt.Errorf("js.Request: Unknown Content-Encoding `%s`", resp.Header.Get("Content-Encoding")))
+		check(fmt.Errorf("js.Request: Unknown Content-Encoding `%s`", resp.Header.Get("Content-Encoding")))
 	}
 	data := readAll(respReader)
 	if trace {

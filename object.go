@@ -1,6 +1,7 @@
 package js
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"maps"
@@ -13,17 +14,30 @@ type Object map[string]any
 
 // NewObject creates a new Object from any Go value.
 func NewObject(v any) Object {
+	return must(toObject(v))
+}
+
+func newObject(v any) Object {
+	obj, _ := toObject(v) // ignore error
+	return obj
+}
+
+func toObject(v any) (Object, error) {
 	switch val := v.(type) {
 	case nil:
-		return nil
+		return nil, nil
 	case Object:
-		return val
+		return val, nil
 	case map[string]any:
-		return val
+		return val, nil
 	case Value:
-		return NewObject(val.val)
+		return toObject(val.val)
 	}
-	return MustParseObject(tryVal(json.Marshal(v)))
+	data, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return ParseObject(data)
 }
 
 // String converts the entire object to a JSON string.
@@ -36,12 +50,12 @@ func (obj Object) String() string {
 
 // Bytes converts the object to bytes (JSON).
 func (obj Object) Bytes() []byte {
-	return tryVal(json.Marshal(map[string]any(obj)))
+	return must(json.Marshal(map[string]any(obj)))
 }
 
 // IndentString converts the object to a formatted string (pretty JSON).
 func (obj Object) IndentString() string {
-	return string(tryVal(json.MarshalIndent(map[string]any(obj), "", "  ")))
+	return string(must(json.MarshalIndent(map[string]any(obj), "", "  ")))
 }
 
 // Len returns the number of key-value pairs in the object.
@@ -204,7 +218,7 @@ func (obj Object) URLValues() (values url.Values) {
 
 // ParseObject parses the object from bytes (JSON).
 func ParseObject(data []byte) (obj Object, err error) {
-	if len(data) > 0 {
+	if data = bytes.TrimSpace(data); len(data) > 0 {
 		err = json.Unmarshal(data, &obj)
 	}
 	return
@@ -212,7 +226,7 @@ func ParseObject(data []byte) (obj Object, err error) {
 
 // MustParseObject parses the object from bytes (JSON) and panics on error.
 func MustParseObject(data []byte) Object {
-	return tryVal(ParseObject(data))
+	return must(ParseObject(data))
 }
 
 // ReadObject reads the object from io.Reader.

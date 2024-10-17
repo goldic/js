@@ -1,8 +1,6 @@
 package js
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestNewObject(t *testing.T) {
 

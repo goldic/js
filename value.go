@@ -220,6 +220,10 @@ func (v Value) Int64() (num int64) {
 	return
 }
 
+func (v Value) Num() float64 {
+	return v.Float64()
+}
+
 func (v Value) Float64() (num float64) {
 	if isNil(v.val) {
 		return

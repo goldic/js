@@ -53,11 +53,24 @@ func (arr *Array) Unshift(v any) {
 }
 
 // Eq retrieves the value from the array by index.
-func (arr Array) Eq(i int) (v Value) {
+func (arr Array) Eq(i int) Value {
 	if arr != nil && i >= 0 && i < len(arr) {
 		return NewValue(arr[i])
 	}
-	return
+	return Value{}
+}
+
+// First retrieves the first value from the array.
+func (arr Array) First() Value {
+	return arr.Eq(0)
+}
+
+// Last retrieves the last value from the array.
+func (arr Array) Last() Value {
+	if n := len(arr); n > 0 {
+		return NewValue(arr[n-1])
+	}
+	return Value{}
 }
 
 // ForEach executes a function for each element in the array.

@@ -47,6 +47,11 @@ func (arr *Array) Push(v any) {
 	*arr = append(*arr, v)
 }
 
+// Unshift adds an element to the beginning of the array.
+func (arr *Array) Unshift(v any) {
+	*arr = append([]any{v}, *arr...)
+}
+
 // Eq retrieves the value from the array by index.
 func (arr Array) Eq(i int) (v Value) {
 	if arr != nil && i >= 0 && i < len(arr) {

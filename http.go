@@ -9,9 +9,12 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/textproto"
 	url2 "net/url"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -22,7 +25,7 @@ var http2Transport = &http.Transport{ // use HTTP/2
 }
 
 func Load(url string) (Value, error) {
-	return Request(http.MethodGet, url, nil, nil)
+	return RequestValue(http.MethodGet, url, nil, nil)
 }
 
 func LoadObject(url string) (Object, error) {
@@ -31,10 +34,15 @@ func LoadObject(url string) (Object, error) {
 }
 
 func PostData(url string, jsonPostData any) (Value, error) {
-	return Request(http.MethodPost, url, nil, jsonPostData)
+	return RequestValue(http.MethodPost, url, nil, jsonPostData)
 }
 
-func Request(method, url string, headers Object, body any) (res Value, err error) {
+func RequestValue(method, url string, headers Object, body any) (val Value, err error) {
+	defer catch(&err)
+	return Parse(must(Request(method, url, headers, body)))
+}
+
+func Request(method, url string, headers Object, body any) (data []byte, err error) {
 	defer catch(&err)
 
 	client := http.DefaultClient
@@ -115,11 +123,18 @@ func Request(method, url string, headers Object, body any) (res Value, err error
 	default:
 		check(fmt.Errorf("js.Request: Unknown Content-Encoding `%s`", resp.Header.Get("Content-Encoding")))
 	}
-	data := readAll(respReader)
+	data = readAll(respReader)
 	if trace {
 		log.Printf("js> http-Response:\n%s", string(data))
 	}
-	return Parse(data)
+	return
+}
+
+func PostMultipart(method, url string, headers Object, params Object, files map[string]string) (res Value, err error) {
+	defer catch(&err)
+	contType, body := makeMultipartBody(params, files)
+	headers = headers.Set("Content-Type", contType)
+	return RequestValue(method, url, headers, body)
 }
 
 func encHeader(h http.Header) (res string) {
@@ -129,4 +144,25 @@ func encHeader(h http.Header) (res string) {
 		}
 	}
 	return
+}
+
+func makeMultipartBody(params Object, files map[string]string) (contType string, body io.Reader) {
+	b := bytes.NewBuffer(nil)
+	w := multipart.NewWriter(b)
+	if params != nil {
+		for key, value := range params {
+			part := must(w.CreateFormField(key))
+			must(part.Write([]byte(ToStr(value))))
+		}
+	}
+	if files != nil {
+		for key, filePath := range files {
+			file := must(os.Open(filePath))
+			defer file.Close()
+			part := must(w.CreateFormFile(key, filepath.Base(file.Name())))
+			must(io.Copy(part, file))
+		}
+	}
+	check(w.Close())
+	return w.FormDataContentType(), b
 }

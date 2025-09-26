@@ -340,6 +340,7 @@ func _cmp[T int64 | float64 | string](a, b T) int {
 }
 
 func ParseTime(s string) (time.Time, error) {
+	s = strings.TrimSpace(s)
 	switch {
 	case len(s) == 0:
 		return time.Time{}, nil
@@ -364,16 +365,42 @@ func ParseTime(s string) (time.Time, error) {
 			return time.Parse("02.01.2006", s)
 		case strings.IndexByte(s, '-') > 0:
 			return time.Parse("2006-01-02", s)
+		case strings.IndexByte(s, '/') > 0:
+			return time.Parse("2006/01/02", s)
 		default: // unix timestamp
 			ts, err := strconv.ParseInt(s, 10, 64)
 			return time.Unix(ts, 0), err
 		}
+
 	case 16:
-		return time.Parse("2006-01-02 15:04", s)
+		switch {
+		case strings.IndexByte(s, '-') > 0:
+			return time.Parse("2006-01-02 15:04", s)
+		case strings.IndexByte(s, '/') > 0:
+			return time.Parse("2006/01/02 15:04", s)
+		case strings.IndexByte(s, '.') > 0:
+			return time.Parse("02.01.2006 15:04", s)
+		}
+
 	case 19:
-		return time.Parse("2006-01-02 15:04:05", s)
+		switch {
+		case strings.IndexByte(s, '-') > 0:
+			return time.Parse("2006-01-02 15:04:05", s)
+		case strings.IndexByte(s, '/') > 0:
+			return time.Parse("2006/01/02 15:04:05", s)
+		case strings.IndexByte(s, '.') > 0:
+			return time.Parse("02.01.2006 15:04:05", s)
+		}
+
 	case 29:
-		return time.Parse("2006-01-02 15:04:05.999999999", s)
+		switch {
+		case strings.IndexByte(s, '-') > 0:
+			return time.Parse("2006-01-02 15:04:05.999999999", s)
+		case strings.IndexByte(s, '/') > 0:
+			return time.Parse("2006/01/02 15:04:05.999999999", s)
+		case strings.IndexByte(s, '.') > 0:
+			return time.Parse("02.01.2006 15:04:05.999999999", s)
+		}
 
 	//case len(time.RFC1123):
 	//	return time.Parse(time.RFC1123, s)

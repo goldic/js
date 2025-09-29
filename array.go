@@ -2,6 +2,7 @@ package js
 
 import (
 	"encoding/json"
+	"sort"
 	"strings"
 )
 
@@ -171,4 +172,30 @@ func (arr Array) Nums() []float64 {
 // MarshalTo deserializes the array into another structure.
 func (arr Array) MarshalTo(v any) error {
 	return json.Unmarshal(arr.Bytes(), v)
+}
+
+// SortByParam sorts the array of objects by a specified parameter name.
+func (arr Array) SortByParam(paramName string) {
+	sort.Slice(arr, func(i, j int) bool {
+		a := arr.Eq(i).Object().get(paramName)
+		b := arr.Eq(j).Object().get(paramName)
+		return Cmp(a, b) < 0
+	})
+}
+
+// Sort sorts the array using a custom comparison function.
+func (arr Array) Sort(less func(a, b Value) bool) {
+	if less == nil {
+		less = func(a, b Value) bool { return Cmp(a.val, b.val) < 0 }
+	}
+	sort.Slice(arr, func(i, j int) bool {
+		return less(arr.Eq(i), arr.Eq(j))
+	})
+}
+
+// Reverse reverses the order of elements in the array.
+func (arr Array) Reverse() {
+	for i, j := 0, len(arr)-1; i < j; i, j = i+1, j-1 {
+		arr[i], arr[j] = arr[j], arr[i]
+	}
 }

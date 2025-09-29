@@ -104,12 +104,16 @@ func (obj Object) Extend(o ...Object) Object {
 	return obj
 }
 
-// Get retrieves the value for the given key as a Value.
-func (obj Object) Get(name string) (v Value) {
+func (obj Object) get(name string) any {
 	if obj != nil {
-		v.val = obj[name]
+		return obj[name]
 	}
-	return
+	return nil
+}
+
+// Get retrieves the value for the given key as a Value.
+func (obj Object) Get(name string) Value {
+	return Value{obj.get(name)}
 }
 
 // GetBool retrieves the boolean value by key.

@@ -174,8 +174,8 @@ func (arr Array) MarshalTo(v any) error {
 	return json.Unmarshal(arr.Bytes(), v)
 }
 
-// SortByParam sorts the array of objects by a specified parameter name.
-func (arr Array) SortByParam(paramName string) {
+// SortBy sorts the array of objects by a specified parameter name.
+func (arr Array) SortBy(paramName string) {
 	sort.Slice(arr, func(i, j int) bool {
 		a := arr.Eq(i).Object().get(paramName)
 		b := arr.Eq(j).Object().get(paramName)

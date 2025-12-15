@@ -18,6 +18,8 @@ import (
 	"strings"
 )
 
+var HTTPClient = http.DefaultClient
+
 const http2Proto = "http2:"
 
 var http2Transport = &http.Transport{ // use HTTP/2
@@ -45,7 +47,7 @@ func RequestValue(method, url string, headers Object, body any) (val Value, err 
 func Request(method, url string, headers Object, body any) (data []byte, err error) {
 	defer catch(&err)
 
-	client := http.DefaultClient
+	client := HTTPClient
 	if strings.HasPrefix(url, http2Proto) {
 		c2 := *client // copy client
 		c2.Transport = http2Transport

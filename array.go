@@ -55,8 +55,13 @@ func (arr *Array) Unshift(v any) {
 
 // Eq retrieves the value from the array by index.
 func (arr Array) Eq(i int) Value {
-	if arr != nil && i >= 0 && i < len(arr) {
-		return NewValue(arr[i])
+	if n := len(arr); n > 0 {
+		if i < 0 {
+			i += n
+		}
+		if i >= 0 && i < n {
+			return NewValue(arr[i])
+		}
 	}
 	return Value{}
 }

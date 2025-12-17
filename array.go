@@ -80,17 +80,38 @@ func (arr Array) Last() Value {
 }
 
 // ForEach executes a function for each element in the array.
-func (arr Array) ForEach(fn func(Value)) {
-	for _, v := range arr {
-		fn(NewValue(v))
+func (arr Array) ForEach(fn func(Value, int)) {
+	for i, v := range arr {
+		fn(NewValue(v), i)
 	}
 }
 
 // ForEachObject executes a function for each object in the array.
-func (arr Array) ForEachObject(fn func(obj Object)) {
-	for _, v := range arr {
-		fn(newObject(v))
+func (arr Array) ForEachObject(fn func(obj Object, index int)) {
+	for i, v := range arr {
+		fn(newObject(v), i)
 	}
+}
+
+// IndexOf searches for an element in the array by a value.
+func (arr Array) IndexOf(value any) int {
+	val := NewValue(value)
+	for i, v := range arr {
+		if val.Equal(v) {
+			return i
+		}
+	}
+	return -1
+}
+
+// IndexOfFn searches for an element in the array by a function.
+func (arr Array) IndexOfFn(fn func(Value) bool) int {
+	for i, v := range arr {
+		if fn(NewValue(v)) {
+			return i
+		}
+	}
+	return -1
 }
 
 // FindObject searches for an object in the array by a function.
@@ -125,10 +146,10 @@ func (arr Array) Filter(fn func(v Value) bool) Array {
 }
 
 // Map transforms the array using a function.
-func (arr Array) Map(fn func(v Value) any) Array {
+func (arr Array) Map(fn func(v Value, index int) any) Array {
 	vv := make(Array, 0, len(arr))
-	for _, v := range arr {
-		vv = append(vv, fn(NewValue(v)))
+	for i, v := range arr {
+		vv = append(vv, fn(NewValue(v), i))
 	}
 	return vv
 }

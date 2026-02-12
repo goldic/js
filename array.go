@@ -44,8 +44,8 @@ func (arr Array) IsNull() bool {
 }
 
 // Push adds an element to the array.
-func (arr *Array) Push(v any) {
-	*arr = append(*arr, v)
+func (arr *Array) Push(v ...any) {
+	*arr = append(*arr, v...)
 }
 
 // Unshift adds an element to the beginning of the array.

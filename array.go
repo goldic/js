@@ -27,6 +27,11 @@ func (arr Array) String() string {
 	return string(arr.Bytes())
 }
 
+// IndentString converts the object to a formatted string (pretty JSON).
+func (arr Array) IndentString() string {
+	return IndentEncode([]any(arr))
+}
+
 // Bytes converts the array to bytes (JSON).
 func (arr Array) Bytes() []byte {
 	b, _ := json.Marshal(arr)

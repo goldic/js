@@ -49,13 +49,15 @@ func (arr Array) IsNull() bool {
 }
 
 // Push adds an element to the array.
-func (arr *Array) Push(v ...any) {
+func (arr *Array) Push(v ...any) *Array {
 	*arr = append(*arr, v...)
+	return arr
 }
 
 // Unshift adds an element to the beginning of the array.
-func (arr *Array) Unshift(v any) {
-	*arr = append([]any{v}, *arr...)
+func (arr *Array) Unshift(v ...any) *Array {
+	*arr = append(v, *arr...)
+	return arr
 }
 
 // Eq retrieves the value from the array by index.

@@ -87,17 +87,19 @@ func (arr Array) Last() Value {
 }
 
 // ForEach executes a function for each element in the array.
-func (arr Array) ForEach(fn func(Value, int)) {
+func (arr Array) ForEach(fn func(Value, int)) Array {
 	for i, v := range arr {
 		fn(NewValue(v), i)
 	}
+	return arr
 }
 
 // ForEachObject executes a function for each object in the array.
-func (arr Array) ForEachObject(fn func(obj Object, index int)) {
+func (arr Array) ForEachObject(fn func(obj Object, index int)) Array {
 	for i, v := range arr {
 		fn(newObject(v), i)
 	}
+	return arr
 }
 
 // IndexOf searches for an element in the array by a value.
